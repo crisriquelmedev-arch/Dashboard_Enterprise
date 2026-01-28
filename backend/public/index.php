@@ -5,12 +5,12 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use App\Infrastructure\Router;
 
-http_response_code(200);
 header('Content-Type: application/json');
+$router = new Router();
+$routes = require __DIR__ . '/../routes/web.php';
+$router->dispatch($routes);
 
-echo json_encode([
-    'status' => 'ok',
-    'message' => 'Dashboard Metrics API running'
-]);
+;
 
