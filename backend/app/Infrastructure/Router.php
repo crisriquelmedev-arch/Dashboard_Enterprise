@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure;
 
-class Router
+final class Router
 {
     public function dispatch(array $routes): void {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -21,4 +21,6 @@ class Router
         $controllerInstance = new $controller();
         $controllerInstance ->$action();
     }
+    
+    
 }

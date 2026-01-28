@@ -12,5 +12,15 @@ $router = new Router();
 $routes = require __DIR__ . '/../routes/web.php';
 $router->dispatch($routes);
 
-;
+set_exception_handler(function (\Throwable $e) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+
+    echo json_encode([
+        'error' => 'Internal Server Error'
+    ]);
+});
+
+
+
 
