@@ -4,23 +4,41 @@ declare(strict_types=1);
 
 namespace App\Infrastructure;
 
+use App\Http\Request;
+use App\Http\Responses\Response;
+use App\Http\Responses\JsonResponse;
+use App\Http\Exceptions\HttpException;
+
+
 final class Router
 {
-    public function dispatch(array $routes): void {
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    public function dispatch(array $routes, Request $request): void {
+        $method = $request->method();
+        $path = $request-> path();
 
-        if(!isset($routes[$method][$uri])){
-            http_response_code(404);
-            echo json_encode(['error' => 'Route not found']);
-            return;
+        try{
+        if(!isset($routes[$method][$path])){
+            throw new HttpException('Route not found', 404);
         }
 
-        [$controller, $action] = $routes[$method][$uri];
+        [$controller, $action] = $routes[$method][$path];
 
         $controllerInstance = new $controller();
-        $controllerInstance ->$action();
+        
+
+        $response = $controllerInstance ->$action($request);
+
+        $response->send();
+        }catch(HttpException $e){
+            (new JsonResponse(['status' => 'error', 'message' => $e-> getMessage()], $e->statusCode()))->send();
+        }catch(\Throwable $e){
+            $debug = (getenv('APP_DEBUG') === true);
+
+            (new \App\Http\Responses\JsonResponse([
+                'status' => 'error',
+                'message' => $debug ? $e->getMessage() : 'Internal Server Error',
+        ], 500))->send();
+        }
     }
-    
     
 }

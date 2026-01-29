@@ -1,37 +1,46 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
-class HealthController {
-    public function index():void {
-        $this->json([
+use App\Http\Request;
+use App\Http\Responses\JsonResponse;
+use App\Http\Responses\Response;
+
+final class HealthController
+{
+    public function index(Request $request): Response
+    {
+        return new JsonResponse([
             'status' => 'ok',
-            'service' => 'Dashboard Metrics API'
+            'service' => 'Dashboard Metrics API',
         ]);
     }
 
-    public function health():void {
-        $this->json([
+    public function health(Request $request): Response
+    {
+        return new JsonResponse([
             'uptime' => 'running',
-            'timestamp' => time()
-        ]); 
+            'timestamp' => time(),
+        ]);
     }
 
-    public function json(array $data): void {
-        header('Content-Type: application/json');
-        echo json_encode($data);
-    }
-
-    public function db(): void {
-        try{
+    public function db(Request $request): Response
+    {
+        try {
             $pdo = \App\Infrastructure\Database::getConnection();
             $pdo->query('SELECT 1');
-            echo json_encode(['status' => 'ok', 'db' => 'up']);
-        }catch(\Throwable $e){
-            http_response_code(500);
-            echo json_encode(['status' => 'error', 'db' => 'down']);
+
+            return new JsonResponse([
+                'status' => 'ok',
+                'db' => 'up',
+            ]);
+        } catch (\Throwable $e) {
+            return new JsonResponse([
+                'status' => 'error',
+                'db' => 'down',
+            ], 500);
         }
     }
-
-
 }

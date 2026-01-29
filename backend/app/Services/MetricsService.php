@@ -14,5 +14,14 @@ class MetricsService {
             return $this->repository->all($limit);
         }
         
+        public function listWithFilter(
+            int $limit,
+            ?string $category,
+            ?string $region,
+            ?string $from,
+            ?string $to
+        ): array{
+            return $this->repository->allWithFilters($limit, $category, $region, $from, $to);
+        }
         
     }
